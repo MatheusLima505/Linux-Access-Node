@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './index.css';
+import './styles/cadastro.css';
 import axios from 'axios';
 
 function Cadastro() {
@@ -8,7 +8,11 @@ function Cadastro() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (!username||!password){
+      console.error("Nome de usuário ou senha nulos.")
+      alert("Nome de usuário ou senha nulos.")
+      return
+    }
     try {
       const response = await axios.post('http://localhost:5000/cadastro', {
         username,
@@ -26,7 +30,8 @@ function Cadastro() {
     <div className='container'>
       <form onSubmit={handleSubmit} className='container'>
         <h1>Cadastro</h1>
-        <input
+        <input 
+          id='inpname'
           placeholder="Nome"
           name="username"
           type="text"
