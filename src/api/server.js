@@ -6,6 +6,8 @@ import bcrypt from 'bcrypt';
 import { rateLimit } from 'express-rate-limit'
 import helmet from 'helmet';
 import { exec } from 'child_process'
+import net from 'net';
+import { query } from 'express';
 
 const app = express();
 const port = 5000;
@@ -33,6 +35,37 @@ const limiterc = rateLimit({
   windowMs: 15 * 60 * 1000, // 5 minutos
   limit: 3 // 3 requisições por IP
 })
+
+//Encontrar porta livre
+function findAvailablePort(startPort = 7000, range = 1000) {
+  return new Promise((resolve, reject) => {
+    let port = startPort;
+
+    function checkPort() {
+      const server = net.createServer();
+
+      server.listen(port, () => {
+        server.close(() => resolve(port));
+      });
+
+      server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          port++;
+          if (port >= startPort + range) {
+            reject(new Error("Nenhuma porta disponível"));
+          } else {
+            checkPort();
+          }
+        } else {
+          reject(err);
+        }
+      });
+    }
+
+    checkPort();
+  });
+}
+
 
 
 //Cadastro de usuario
@@ -72,27 +105,72 @@ app.post('/api/createcontainer', async (req, res) => {
   }
   // Gera um nome único para o container (ex: user-1-container-123)
   const containerName = `user-${userId}-container-${Date.now()}`;
+  const aport = await findAvailablePort(7000, 1000);
 
   try {
-    exec(`docker run -d --name ${containerName} -p 7070:7070 ttyd-test`, async (error, stdout, stderr) => {
-        if (error) {
-            console.error("Erro ao criar container:", error);
-            return res.status(500).json({ message: "Erro ao criar container", error: error.message });
-        }
+    exec(`docker run -d --name ${containerName} -p ${aport}:7681 ttyd-test`, async (error, stdout, stderr) => {
+      if (error) {
+        console.error("Erro ao criar container:", error);
+        return res.status(500).json({ message: "Erro ao criar container", error: error.message });
+      }
 
-        if (stderr) console.warn("Aviso do Docker:", stderr);
+      if (stderr) console.warn("Aviso do Docker:", stderr);
 
-        // Salva no banco de dados
-        await db.execute("INSERT INTO user_containers (user_id, container_id, container_status) VALUES (?, ?, ?)", 
-            [userId, containerName, "running"]);
+      // Salva no banco de dados
+      await db.execute("INSERT INTO user_containers (user_id, container_name, container_status, container_port) VALUES (?, ?, ?, ?)",
+        [userId, containerName, "running", aport]);
 
-        res.json({ message: "Container criado", containerId: containerName });
+      res.json({ message: "Container criado", containerId: containerName });
     });
 
-} catch (error) {
+  } catch (error) {
     res.status(500).json({ message: "Erro ao criar container", error: error.message });
-}
+  }
 });
+
+//listar containers de usuario
+app.get('/api/listcontainers', async (req, res) => {
+  try {
+    const userID = req.query.userID;
+    if (!userID) {
+      return res.status(400).json({ message: "userID é obrigatório" });
+    }
+
+    const query = 'SELECT * FROM user_containers WHERE user_id = ?';
+
+    await db.execute(query, [userID], (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Erro no banco de dados", error: err });
+      }
+      res.json(results);
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno", error: error.message });
+  }
+});
+
+//remover container
+app.delete('/api/rmcontainer', async (req, res) => {
+  try {
+    const { cont_id, cont_name } = req.query;
+    const query = 'delete from user_containers where id = ?'
+    await db.execute(query, [cont_id])
+    exec(`docker rm -f ${cont_name}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error("Erro ao remover container:", error);
+      }
+      res.json({ message: "Container removido com sucesso" });
+  });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro interno', error: error.message })
+    console.log(
+      'id', req.body.cont_id,
+      'name', req.body.cont_name
+    )
+  }
+})
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
