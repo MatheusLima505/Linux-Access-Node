@@ -1,12 +1,21 @@
-# React + Vite
+# LAN, Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+__Linux Access Node__ is an educational platform designed to give students access to Linux terminals through Docker containers. This project aims to provide an environment where students can practice Linux commands and concepts directly from a web interface. It's especially useful for courses in computer networks and systems administration, where hands-on experience with Linux is essential for mastering key skills.
 
-Currently, two official plugins are available:
+# Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Web-based Linux terminals:** No installation required, accessible through a browser.
 
-## Expanding the ESLint configuration
+**Authentication and user management:** Each student has their own account, ensuring personalized and secure access.
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Persistent progress:** Student progress is saved inside the Docker container, allowing them to continue where they left off.
+
+**Hands-on learning:** Students can practice networking and Linux fundamentals in a real-world environment.
+
+
+# Installation
+
+Firstly, need to build the TTYD Docker image, check [this](https://github.com/MatheusLima505/Linux-Access-Node-TTYD-Image) repo. Then, the dependencies, like vite, and you'r ready to go.
+
+## Dependencies
+Supabase
