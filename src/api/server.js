@@ -1,5 +1,4 @@
 import express from 'express';
-import mysql from 'mysql2';
 import cors from 'cors';
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
@@ -8,16 +7,16 @@ import helmet from 'helmet';
 import { exec } from 'child_process'
 import net from 'net';
 import { query } from 'express';
+import { createClient } from '@supabase/supabase-js';
+
+
+//supabase
+const supabaseUrl = 'https://qkehqytciiacvmehslco.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWhxeXRjaWlhY3ZtZWhzbGNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1NzA0NjUsImV4cCI6MjA2MjE0NjQ2NX0.64fQGwbOZ_1P5uVyWflLdKD9VXKikrSl4juiLariFwA';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const app = express();
 const port = 5000;
-
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-});
 
 app.use(express.json());
 app.use(cors());
@@ -66,27 +65,49 @@ function findAvailablePort(startPort = 7000, range = 1000) {
   });
 }
 
-
-
-//Cadastro de usuario
-app.post('/cadastro', limiterc, async (req, res) => {
+// Cadastro de usuario
+app.post('/cadastro', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const { username, password } = req.body;
+
   if (!username || !password) {
     return res.status(400).json({ message: 'Username e password são obrigatórios.' });
   }
+
   try {
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    db.execute(query, [username, hashedPassword], (err, result) => {
-      if (err) {
-        console.error('Erro ao cadastrar usuário:', err);
-        return res.status(500).json({ message: 'Erro ao cadastrar usuário.' });
-      } if (err && err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ message: 'Usuário já existe.' });
-      }
-      return res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-    })
+
+    // Check if the user already exists
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (fetchError && fetchError.code !== 'PGRST100') {
+      console.error('Erro ao verificar usuário existente:', fetchError);
+      return res.status(500).json({ message: 'Erro ao verificar usuário.' });
+    }
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Usuário já existe.' });
+    }
+
+    // Insert the new user into the database
+    const { data, error } = await supabase
+      .from('users')
+      .insert([
+        { username, password: hashedPassword }
+      ]);
+
+    if (error) {
+      console.error('Erro ao cadastrar usuário:', error);
+      return res.status(500).json({ message: 'Erro ao cadastrar usuário.' });
+    }
+
+    return res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
+
   } catch (error) {
     console.error('Erro ao criptografar a senha:', error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
@@ -103,11 +124,13 @@ app.post('/api/createcontainer', async (req, res) => {
   if (!userId) {
     return res.status(400).json({ message: "ID do usuário não fornecido" });
   }
+
   // Gera um nome único para o container (ex: user-1-container-123)
   const containerName = `user-${userId}-container-${Date.now()}`;
   const aport = await findAvailablePort(7000, 1000);
 
   try {
+    // Cria o container usando o Docker
     exec(`docker run -d --name ${containerName} -p ${aport}:7681 ttyd-test`, async (error, stdout, stderr) => {
       if (error) {
         console.error("Erro ao criar container:", error);
@@ -116,14 +139,24 @@ app.post('/api/createcontainer', async (req, res) => {
 
       if (stderr) console.warn("Aviso do Docker:", stderr);
 
-      // Salva no banco de dados
-      await db.execute("INSERT INTO user_containers (user_id, container_name, container_status, container_port) VALUES (?, ?, ?, ?)",
-        [userId, containerName, "running", aport]);
+      // Salva no banco de dados (Supabase)
+      const { data, error: insertError } = await supabase
+        .from('user_containers')
+        .insert([
+          { user_id: userId, container_name: containerName, container_status: 'running', container_port: aport }
+        ]);
 
+      if (insertError) {
+        console.error("Erro ao salvar no banco de dados:", insertError);
+        return res.status(500).json({ message: "Erro ao salvar container no banco de dados", error: insertError.message });
+      }
+
+      // Resposta de sucesso
       res.json({ message: "Container criado", containerId: containerName });
     });
 
   } catch (error) {
+    console.error("Erro ao criar o container:", error);
     res.status(500).json({ message: "Erro ao criar container", error: error.message });
   }
 });
@@ -136,41 +169,68 @@ app.get('/api/listcontainers', async (req, res) => {
       return res.status(400).json({ message: "userID é obrigatório" });
     }
 
-    const query = 'SELECT * FROM user_containers WHERE user_id = ?';
+    // Query to fetch containers for the given userID
+    const { data, error } = await supabase
+      .from('user_containers')
+      .select('*')
+      .eq('user_id', userID);
 
-    await db.execute(query, [userID], (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: "Erro no banco de dados", error: err });
-      }
-      res.json(results);
-    });
+    if (error) {
+      console.error("Erro ao buscar containers:", error);
+      return res.status(500).json({ message: "Erro ao buscar containers", error: error.message });
+    }
 
+    // Return the data if the query is successful
+    res.json(data);
+    
   } catch (error) {
+    console.error("Erro interno:", error);
     res.status(500).json({ message: "Erro interno", error: error.message });
   }
 });
 
+
 //remover container
+
 app.delete('/api/rmcontainer', async (req, res) => {
   try {
     const { cont_id, cont_name } = req.query;
-    const query = 'delete from user_containers where id = ?'
-    await db.execute(query, [cont_id])
+    
+    if (!cont_id || !cont_name) {
+      return res.status(400).json({ message: "ID e nome do container são obrigatórios" });
+    }
+
+    // Remove container record from Supabase
+    const { data, error: deleteError } = await supabase
+      .from('user_containers')
+      .delete()
+      .eq('id', cont_id);
+
+    if (deleteError) {
+      console.error("Erro ao remover container do banco de dados:", deleteError);
+      return res.status(500).json({ message: "Erro ao remover container do banco de dados", error: deleteError.message });
+    }
+
+    // Remove Docker container using Docker CLI
     exec(`docker rm -f ${cont_name}`, (error, stdout, stderr) => {
       if (error) {
-        console.error("Erro ao remover container:", error);
+        console.error("Erro ao remover container Docker:", error);
+        return res.status(500).json({ message: "Erro ao remover container Docker", error: error.message });
       }
-      res.json({ message: "Container removido com sucesso" });
-  });
-  } catch (error) {
-    res.status(500).json({ message: 'Erro interno', error: error.message })
-    console.log(
-      'id', req.body.cont_id,
-      'name', req.body.cont_name
-    )
-  }
-})
 
+      if (stderr) {
+        console.warn("Aviso do Docker:", stderr);
+      }
+
+      // Send success response
+      res.json({ message: "Container removido com sucesso" });
+    });
+
+  } catch (error) {
+    console.error("Erro interno:", error);
+    res.status(500).json({ message: 'Erro interno', error: error.message });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
