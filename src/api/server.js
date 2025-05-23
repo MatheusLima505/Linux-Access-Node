@@ -231,6 +231,27 @@ app.delete('/api/rmcontainer', async (req, res) => {
     res.status(500).json({ message: 'Erro interno', error: error.message });
   }
 });
+//renomear container 
+app.post('/api/renamecontainer', async (req, res) => {
+  try {
+    const cont_id = req.body.cont_id;
+    const cont_name = req.body.cont_name;
+
+    const { data, error: renameError } = await supabase
+      .from('user_containers')
+      .update({ container_name: cont_name })
+      .eq('id', cont_id);
+
+    if (renameError) {
+      return res.status(500).json({ error: renameError.message });
+    }
+
+    return res.status(200).json({ message: 'Container renomeado com sucesso.', data });
+  } catch (err) {
+    console.error('Erro inesperado:', err);
+    return res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);

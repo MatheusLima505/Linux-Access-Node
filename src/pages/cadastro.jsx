@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './styles/cadastro.css';
 import axios from 'axios';
 
 function Cadastro() {
