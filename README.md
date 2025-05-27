@@ -18,4 +18,11 @@ __Linux Access Node__ is an educational platform designed to give students acces
 Firstly, need to build the TTYD Docker image, check [this](https://github.com/MatheusLima505/Linux-Access-Node-TTYD-Image) repo. Then, the dependencies, like vite, and you'r ready to go.
 
 ## Dependencies
+Vite
+```bash
+npm i vite
+```
 Supabase
+```bash
+npm install @supabase/supabase-js
+```
