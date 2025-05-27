@@ -1,0 +1,3 @@
+[submodule "submodule/ttyd-image"]
+	path = submodule/ttyd-image
+	url = https://github.com/MatheusLima505/Linux-Access-Node-TTYD-Image
