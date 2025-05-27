@@ -1,4 +1,4 @@
-# LAN, Frontend
+# LAN
 
 __Linux Access Node__ is an educational platform designed to give students access to Linux terminals through Docker containers. This project aims to provide an environment where students can practice Linux commands and concepts directly from a web interface. It's especially useful for courses in computer networks and systems administration, where hands-on experience with Linux is essential for mastering key skills.
 
