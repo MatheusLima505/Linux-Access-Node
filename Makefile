@@ -7,15 +7,16 @@ install:
 		curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash; \
 	fi
 
-	# Carrega NVM e instala Node.js 22
-	export NVM_DIR="$$HOME/.nvm" && \
-	. "$$NVM_DIR/nvm.sh" && \
-	nvm install 22 && \
-	nvm use 22
-
-	# Instala dependências npm
-	npm i vite
-	npm install
+	# Roda tudo numa mesma shell: carrega nvm, instala node, usa node e instala npm deps
+	bash -c '\
+		export NVM_DIR="$$HOME/.nvm"; \
+		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		nvm install 22; \
+		nvm use 22; \
+		npm install node-pre-gyp --save-dev; \
+		npm i vite; \
+		npm install; \
+	'
 
 	# Atualiza submódulos git
 	git submodule update --init --recursive
@@ -30,7 +31,6 @@ install:
 	-wsl --shutdown
 
 	# Builda imagem Docker com BuildKit ativado via variável de ambiente
-
 	cd ./submodule/ttyd-image/regular_docker && DOCKER_BUILDKIT=1 sudo docker build -t ttyd-test .
 
 
