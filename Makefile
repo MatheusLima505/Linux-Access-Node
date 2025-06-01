@@ -7,14 +7,11 @@ install:
 		curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash; \
 	fi
 
-	# Roda tudo numa mesma shell: carrega nvm, instala node, usa node e instala npm deps
 	bash -c '\
 		export NVM_DIR="$$HOME/.nvm"; \
 		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
-		nvm install 22; \
-		nvm use 22; \
-		npm install node-pre-gyp --save-dev; \
-		npm i vite; \
+		nvm install node; \
+		nvm use node; \
 		npm install; \
 	'
 
