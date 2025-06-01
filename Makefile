@@ -1,19 +1,6 @@
 install:
-	# Atualiza e instala ferramentas essenciais
-	sudo apt-get update && sudo apt-get install -y curl git build-essential docker.io gnome-terminal
-
-	# Instala NVM se não existir
-	if [ ! -d "$$HOME/.nvm" ]; then \
-		curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash; \
-	fi
-
-	bash -c '\
-		export NVM_DIR="$$HOME/.nvm"; \
-		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
-		nvm install node; \
-		nvm use node; \
-		npm install; \
-	'
+	# Atualiza e instala ferramentas essenciais + nodejs e npm
+	sudo apt-get update && sudo apt-get install -y curl git build-essential docker.io gnome-terminal nodejs npm
 
 	# Atualiza submódulos git
 	git submodule update --init --recursive
