@@ -1,6 +1,6 @@
 install:
-	# Atualiza e instala ferramentas essenciais + nodejs e npm
-	sudo apt-get update && sudo apt-get install -y curl git build-essential docker.io gnome-terminal nodejs npm
+	# Atualiza e instala ferramentas essenciais
+	sudo apt-get update && sudo apt-get install -y curl git build-essential docker.io
 
 	# Atualiza submódulos git
 	git submodule update --init --recursive
@@ -17,8 +17,20 @@ install:
 	# Builda imagem Docker com BuildKit ativado via variável de ambiente
 	cd ./submodule/ttyd-image/regular_docker && DOCKER_BUILDKIT=1 sudo docker build -t ttyd-test .
 
-	# leia npm
+	$(MAKE) node
 	$(MAKE) npm
+
+node:
+	# Instala o NVM (Node Version Manager)
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+	# Carrega o NVM na sessão atual do shell
+	export NVM_DIR="$$HOME/.nvm" && \
+		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh" && \
+		nvm install --lts && \
+		nvm use --lts && \
+		nvm alias default lts/*
+
 
 npm:
 	# Reinstala pastas do npm para evitar conflito entre linux e windows
