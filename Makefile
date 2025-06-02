@@ -24,12 +24,13 @@ node:
 	# Instala o NVM (Node Version Manager)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
-	# Carrega o NVM na sessão atual do shell
+	# Carrega o NVM na sessão atual e instala o Node LTS
 	export NVM_DIR="$$HOME/.nvm" && \
-		[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh" && \
+		. "$$NVM_DIR/nvm.sh" && \
 		nvm install --lts && \
-		nvm use --lts && \
-		nvm alias default lts/*
+		nvm alias default lts/* && \
+		nvm use default && \
+		echo "Node version: $$(node -v), NPM version: $$(npm -v)"
 
 
 npm:
