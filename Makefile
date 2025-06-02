@@ -5,11 +5,12 @@ install:
 	# Atualiza submódulos git
 	git submodule update --init --recursive
 
-	# Configura Docker para desabilitar IPv6 (sem 'features' que dá erro)
+	# Configura Docker para desabilitar IPv6
 	echo '{ "ipv6": false }' | sudo tee /etc/docker/daemon.json > /dev/null
 
-	# Reinicia Docker (use service ou systemctl conforme seu sistema)
-	sudo systemctl restart docker || sudo service docker restart
+	# Tenta reiniciar docker, ignora erro se systemctl/service não existirem
+	(sudo systemctl restart docker || sudo service docker restart || echo "Não foi possível reiniciar Docker automaticamente.")
+
 
 	# Se estiver usando WSL, reinicia para aplicar mudanças
 	-wsl --shutdown
