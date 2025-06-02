@@ -17,11 +17,13 @@ install:
 	# Builda imagem Docker com BuildKit ativado via variável de ambiente
 	cd ./submodule/ttyd-image/regular_docker && DOCKER_BUILDKIT=1 sudo docker build -t ttyd-test .
 
+	# leia npm
+	$(MAKE) npm
+
+npm:
 	# Reinstala pastas do npm para evitar conflito entre linux e windows
 	rm -rf node_modules package-lock.json
 	npm install
-
-
 
 run:
 	npm run dev &
