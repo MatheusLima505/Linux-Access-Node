@@ -40,5 +40,5 @@ npm:
 	npm install
 
 run:
-	npm run dev &
+	npm run dev -- --host &
 	cd ./src/api && node server.js
