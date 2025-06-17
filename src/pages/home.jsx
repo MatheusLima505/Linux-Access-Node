@@ -9,7 +9,7 @@ function Home() {
     const fetchContainers = async () => {
         try {
             const userID = 1
-            const response = await axios.get("http://3.88.176.251:5000/api/listcontainers?userID=1", { userID });
+            const response = await axios.get("http://localhost:5000/api/listcontainers?userID=1", { userID });
             console.log((response.data))
             setContainers(response.data);
         } catch (error) {
@@ -22,7 +22,7 @@ function Home() {
     const rmContainer = async (cont_id, cont_name) => {
         try {
             const userID = 1
-            const response = await axios.delete("http://3.88.176.251:5000/api/rmcontainer", {
+            const response = await axios.delete("http://localhost:5000/api/rmcontainer", {
                 params: {
                     cont_id,
                     cont_name
@@ -38,7 +38,7 @@ function Home() {
     const criarContainer = async () => {
         try {
             const userID = 1
-            const response = await axios.post("http://3.88.176.251:5000/api/createcontainer", {
+            const response = await axios.post("http://localhost:5000/api/createcontainer", {
                 userID
             });
             fetchContainers();
@@ -52,7 +52,7 @@ function Home() {
 
     const renameContainer = async (id, novoNome) => {
         try {
-            const response = await axios.post("http://3.88.176.251:5000/api/renamecontainer", {
+            const response = await axios.post("http://localhost:5000/api/renamecontainer", {
                 cont_id: id,
                 cont_name: novoNome
             });
@@ -90,7 +90,7 @@ function Home() {
                     <li key={container.id} className={styles.containerItem}>
                         <a
                             className={styles.containerLink}
-                            href={`http://3.88.176.251:${container.container_port}`}
+                            href={`http://localhost:${container.container_port}`}
                         >
                             Nome: {container.container_name} | Status: {container.container_status}
                         </a>
