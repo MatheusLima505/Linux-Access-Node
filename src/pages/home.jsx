@@ -22,7 +22,7 @@ function Home() {
     const rmContainer = async (cont_id, cont_name) => {
         try {
             const userID = 1
-            const response = await axios.delete("http://3.88.176.251/:5000/api/rmcontainer", {
+            const response = await axios.delete("http://3.88.176.251:5000/api/rmcontainer", {
                 params: {
                     cont_id,
                     cont_name
