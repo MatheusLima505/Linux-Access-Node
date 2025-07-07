@@ -253,6 +253,55 @@ app.post('/api/renamecontainer', async (req, res) => {
   }
 });
 
+// Login
+app.post('/login', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username e password são obrigatórios.' });
+  }
+
+  try {
+    // Busca o usuário
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erro ao buscar usuário:", error);
+      return res.status(500).json({ message: "Erro ao buscar usuário" });
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: "Usuário não encontrado" });
+    }
+
+    // Compara senhas
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Senha incorreta" });
+    }
+
+    // Retorna sucesso com ID e username (ou o que desejar)
+    return res.status(200).json({ 
+      message: "Login bem-sucedido", 
+      user: {
+        id: user.id,
+        username: user.username
+      }
+    });
+
+  } catch (err) {
+    console.error("Erro interno:", err);
+    return res.status(500).json({ message: "Erro interno", error: err.message });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${port}`);
 });

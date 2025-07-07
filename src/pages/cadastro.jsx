@@ -46,7 +46,7 @@ function Cadastro() {
         />
         <button type='submit'>Criar conta</button>
       </form>
-      <a href="http://127.0.0.1:5173/login">Já tem uma conta? entre!</a>
+      <a href="http://localhost:5173/login">Já tem uma conta? entre!</a>
     </div>
   );
 }

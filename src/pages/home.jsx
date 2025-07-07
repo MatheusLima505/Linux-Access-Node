@@ -3,42 +3,38 @@ import { useEffect, useState } from "react";
 import styles from './Home.module.css'
 
 function Home() {
-    const [containers, setContainers] = useState([]); // Inicializa containers como um array vazio
+    const [containers, setContainers] = useState([]);
+    const [editando, setEditando] = useState(null);
+    const [novoNome, setNovoNome] = useState("");
 
-    //listar containers
+    const userID = localStorage.getItem("userID");
+
+    // Redireciona para login se não estiver logado
+    useEffect(() => {
+        if (!userID) {
+            alert("Usuário não autenticado. Redirecionando para o login...");
+            window.location.href = "http://localhost:5173/login";
+        } else {
+            fetchContainers();
+        }
+    }, []);
+
+    // Listar containers
     const fetchContainers = async () => {
         try {
-            const userID = 1
-            const response = await axios.get("http://localhost:5000/api/listcontainers?userID=1", { userID });
-            console.log((response.data))
+            const response = await axios.get("http://localhost:5000/api/listcontainers", {
+                params: { userID }
+            });
             setContainers(response.data);
         } catch (error) {
             alert("Erro ao buscar containers: " + (error.response?.data?.message || error.message));
         }
     };
 
-
-    //remover containers
-    const rmContainer = async (cont_id, cont_name) => {
-        try {
-            const userID = 1
-            const response = await axios.delete("http://localhost:5000/api/rmcontainer", {
-                params: {
-                    cont_id,
-                    cont_name
-                }
-            });
-            fetchContainers();
-        } catch (error) {
-            alert("Erro: " + (error.response?.data?.message || error.message))
-        }
-    }
-
-    //Botão de criar container
+    // Criar container
     const criarContainer = async () => {
         try {
-            const userID = 1
-            const response = await axios.post("http://localhost:5000/api/createcontainer", {
+            await axios.post("http://localhost:5000/api/createcontainer", {
                 userID
             });
             fetchContainers();
@@ -46,13 +42,26 @@ function Home() {
             alert("Erro: " + (error.response?.data?.message || error.message));
         }
     };
-    //renomear container
-    const [editando, setEditando] = useState(null);
-    const [novoNome, setNovoNome] = useState("");
 
+    // Remover container
+    const rmContainer = async (cont_id, cont_name) => {
+        try {
+            await axios.delete("http://localhost:5000/api/rmcontainer", {
+                params: {
+                    cont_id,
+                    cont_name
+                }
+            });
+            fetchContainers();
+        } catch (error) {
+            alert("Erro: " + (error.response?.data?.message || error.message));
+        }
+    };
+
+    // Renomear container
     const renameContainer = async (id, novoNome) => {
         try {
-            const response = await axios.post("http://localhost:5000/api/renamecontainer", {
+            await axios.post("http://localhost:5000/api/renamecontainer", {
                 cont_id: id,
                 cont_name: novoNome
             });
@@ -74,9 +83,11 @@ function Home() {
         renameContainer(id, novoNome);
         setEditando(null);
     };
-    useEffect(() => {
-        fetchContainers();
-    }, []);
+
+    const handleLogout = () => {
+    localStorage.removeItem("userID");
+    window.location.href = "http://localhost:5173/login";
+};
 
 
     return (
@@ -84,6 +95,7 @@ function Home() {
             <div className={styles.header}>
                 <h2>Seus containers:</h2>
                 <button className={styles.addBtn} onClick={criarContainer}>ADD</button>
+                <button className={styles.logoutBtn} onClick={handleLogout}>Sair</button>
             </div>
             <ul className={styles.containerList}>
                 {containers.map((container) => (
@@ -115,6 +127,5 @@ function Home() {
         </div>
     );
 }
-
 
 export default Home;

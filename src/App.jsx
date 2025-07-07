@@ -8,7 +8,7 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route exact path="/" element={<Cadastro />} />
+                <Route exact path="/cadastro" element={<Cadastro />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/home" element={<Home /> }/>
                 
