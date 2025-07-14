@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import styles from './Home.module.css'
+import styles from './Home.module.css';
+import config from './config';
 
 function Home() {
     const [containers, setContainers] = useState([]);
@@ -9,20 +10,18 @@ function Home() {
 
     const userID = localStorage.getItem("userID");
 
-    // Redireciona para login se não estiver logado
     useEffect(() => {
         if (!userID) {
             alert("Usuário não autenticado. Redirecionando para o login...");
-            window.location.href = "http://localhost:5173/login";
+            window.location.href = `http://${config.publicIP}/login`;
         } else {
             fetchContainers();
         }
     }, []);
 
-    // Listar containers
     const fetchContainers = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/listcontainers", {
+            const response = await axios.get(`http://${config.serverIP}/api/listcontainers`, {
                 params: { userID }
             });
             setContainers(response.data);
@@ -31,26 +30,19 @@ function Home() {
         }
     };
 
-    // Criar container
     const criarContainer = async () => {
         try {
-            await axios.post("http://localhost:5000/api/createcontainer", {
-                userID
-            });
+            await axios.post(`http://${config.serverIP}/api/createcontainer`, { userID });
             fetchContainers();
         } catch (error) {
             alert("Erro: " + (error.response?.data?.message || error.message));
         }
     };
 
-    // Remover container
     const rmContainer = async (cont_id, cont_name) => {
         try {
-            await axios.delete("http://localhost:5000/api/rmcontainer", {
-                params: {
-                    cont_id,
-                    cont_name
-                }
+            await axios.delete(`http://${config.serverIP}/api/rmcontainer`, {
+                params: { cont_id, cont_name }
             });
             fetchContainers();
         } catch (error) {
@@ -58,10 +50,9 @@ function Home() {
         }
     };
 
-    // Renomear container
     const renameContainer = async (id, novoNome) => {
         try {
-            await axios.post("http://localhost:5000/api/renamecontainer", {
+            await axios.post(`http://${config.serverIP}/api/renamecontainer`, {
                 cont_id: id,
                 cont_name: novoNome
             });
@@ -85,10 +76,9 @@ function Home() {
     };
 
     const handleLogout = () => {
-    localStorage.removeItem("userID");
-    window.location.href = "http://localhost:5173/login";
-};
-
+        localStorage.removeItem("userID");
+        window.location.href = `http://${config.publicIP}/login`;
+    };
 
     return (
         <div className={styles.wrapper}>
@@ -102,7 +92,7 @@ function Home() {
                     <li key={container.id} className={styles.containerItem}>
                         <a
                             className={styles.containerLink}
-                            href={`http://localhost:${container.container_port}`}
+                            href={`http://${config.publicIP.split(':')[0]}:${container.container_port}`}
                         >
                             Nome: {container.container_name} | Status: {container.container_status}
                         </a>

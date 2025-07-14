@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import config from './config';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ function Login() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/login', {
+      const response = await axios.post(`http://${config.serverIP}/login`, {
         username,
         password,
       });
@@ -24,7 +25,7 @@ function Login() {
       // Exemplo: guardar userID no localStorage para usar depois
       localStorage.setItem("userID", user.id);
       // Redirecionar, se quiser:
-      window.location.href = "http://localhost:5173/Home"; // ou onde quiser ir após login
+      window.location.href = `http://${config.publicIP}/Home`; // ou onde quiser ir após login
 
     } catch (error) {
       console.error('Erro ao fazer login:', error);
@@ -50,7 +51,7 @@ function Login() {
         />
         <button type="submit">Entrar</button>
       </form>
-      <a href="http://localhost:5173/cadastro">Ainda não tem conta? Cadastre-se</a>
+      <a href={`http://${config.publicIP}/cadastro`}>Ainda não tem conta? Cadastre-se</a>
     </div>
   );
 }

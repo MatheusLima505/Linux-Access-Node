@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import config from './config'; // importa os IPs
 
 function Cadastro() {
   const [username, setUsername] = useState('');
@@ -7,13 +8,14 @@ function Cadastro() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username||!password){
-      console.error("Nome de usuário ou senha nulos.")
-      alert("Nome de usuário ou senha nulos.")
-      return
+    if (!username || !password) {
+      console.error("Nome de usuário ou senha nulos.");
+      alert("Nome de usuário ou senha nulos.");
+      return;
     }
+
     try {
-      const response = await axios.post('http://localhost:5000/cadastro', {
+      const response = await axios.post(`http://${config.serverIP}/cadastro`, {
         username,
         password,
       });
@@ -29,7 +31,7 @@ function Cadastro() {
     <div className='container'>
       <form onSubmit={handleSubmit} className='container'>
         <h1>Cadastro</h1>
-        <input 
+        <input
           id='inpname'
           placeholder="Nome"
           name="username"
@@ -46,7 +48,7 @@ function Cadastro() {
         />
         <button type='submit'>Criar conta</button>
       </form>
-      <a href="http://localhost:5173/login">Já tem uma conta? entre!</a>
+      <a href={`http://${config.publicIP}/login`}>Já tem uma conta? entre!</a>
     </div>
   );
 }
