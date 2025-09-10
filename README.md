@@ -28,6 +28,9 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
 
 # Node.js (LTS) e npm
 nvm install --lts
+
+# Make
+sudo apt install make
 ```
 
 ## 2. Configure o projeto
