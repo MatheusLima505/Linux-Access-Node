@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import config from './config'; // importa os IPs
-import styles from 'Cadastro.module.css'
+import styles from './Cadastro.module.css'
 
 function Cadastro() {
   const [username, setUsername] = useState('');
@@ -55,4 +55,5 @@ function Cadastro() {
 }
 
 export default Cadastro;
+
 
