@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import config from './config';
+import styles from './Login.module.css';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -34,8 +35,8 @@ function Login() {
   };
 
   return (
-    <div className='container'>
-      <form onSubmit={handleLogin} className='container'>
+    <div className={styles.container}>
+      <form onSubmit={handleLogin} className={styles.container}>
         <h1>Login</h1>
         <input
           placeholder="Nome de usuário"
@@ -57,3 +58,4 @@ function Login() {
 }
 
 export default Login;
+
