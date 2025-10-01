@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import config from './config'; // importa os IPs
+import styles from 'Cadastro.module.css'
 
 function Cadastro() {
   const [username, setUsername] = useState('');
@@ -28,8 +29,8 @@ function Cadastro() {
   };
 
   return (
-    <div className='container'>
-      <form onSubmit={handleSubmit} className='container'>
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.container}>
         <h1>Cadastro</h1>
         <input
           id='inpname'
@@ -54,3 +55,4 @@ function Cadastro() {
 }
 
 export default Cadastro;
+
