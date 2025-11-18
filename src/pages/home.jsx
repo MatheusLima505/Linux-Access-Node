@@ -94,7 +94,7 @@ function Home() {
                             className={styles.containerLink}
                             href={`http://${config.publicIP.split(':')[0]}:${container.container_port}`}
                         >
-                            Nome: {container.container_name} | Status: {container.container_status}
+                            Nome: {container.container_name}
                         </a>
 
                         {editando === container.id ? (
