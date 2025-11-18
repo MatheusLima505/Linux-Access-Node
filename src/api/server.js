@@ -302,6 +302,40 @@ app.post('/login', async (req, res) => {
   }
 });
 
+//valida usuario
+app.get('/validate-user/:id', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+
+  const userID = req.params.id;
+
+  if (!userID) {
+    return res.status(400).json({ message: "ID não fornecido" });
+  }
+
+  try {
+    // buscamos apenas o ID para ser rápido
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userID)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return res.status(500).json({ message: "Erro ao validar usuário" });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não existe" });
+    }
+
+    return res.status(200).json({ ok: true });
+
+  } catch (err) {
+    console.error("Erro interno:", err);
+    return res.status(500).json({ message: "Erro interno" });
+  }
+});
 app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${port}`);
 });

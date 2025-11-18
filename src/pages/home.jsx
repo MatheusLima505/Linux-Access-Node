@@ -8,16 +8,40 @@ function Home() {
     const [editando, setEditando] = useState(null);
     const [novoNome, setNovoNome] = useState("");
 
-    const userID = localStorage.getItem("userID");
+const userID = localStorage.getItem("userID");
 
-    useEffect(() => {
-        if (!userID) {
-            alert("Usuário não autenticado. Redirecionando para o login...");
-            window.location.href = `http://${config.publicIP}/login`;
-        } else {
-            fetchContainers();
+useEffect(() => {
+    if (!userID) {
+        alert("Usuário não autenticado. Redirecionando para o login...");
+        window.location.href = `http://${config.publicIP}/login`;
+        return;
+    }
+
+    validateUser();
+    fetchContainers();
+}, []);
+
+async function validateUser() {
+    try {
+        const response = await fetch(`http://${config.serverIP}/validate-user/${userID}`);
+
+        if (!response.ok) {
+            alert("Sessão inválida. Faça login novamente.");
+            localStorage.removeItem("userID");
+            window.location.href = `http://${config.serverIP}/login`;
+            return false;
         }
-    }, []);
+        
+        return true;
+
+    } catch (error) {
+        console.error("Erro ao validar user:", error);
+        alert("Erro interno. Faça login novamente.");
+        localStorage.removeItem("userID");
+        window.location.href = `http://${config.publicIP}/login`;
+        return false;
+    }
+}
 
     const fetchContainers = async () => {
         try {
@@ -31,12 +55,14 @@ function Home() {
     };
 
     const criarContainer = async () => {
+        if (await validateUser()){
         try {
             await axios.post(`http://${config.serverIP}/api/createcontainer`, { userID });
             fetchContainers();
         } catch (error) {
             alert("Erro: " + (error.response?.data?.message || error.message));
         }
+    }
     };
 
     const rmContainer = async (cont_id, cont_name) => {
@@ -84,7 +110,7 @@ function Home() {
         <div className={styles.wrapper}>
             <div className={styles.header}>
                 <h2>Seus containers:</h2>
-                <button className={styles.addBtn} onClick={criarContainer}>ADD</button>
+                <button className={styles.addBtn} onClick={criarContainer}>Novo Ambiente</button>
                 <button className={styles.logoutBtn} onClick={handleLogout}>Sair</button>
             </div>
             <ul className={styles.containerList}>
