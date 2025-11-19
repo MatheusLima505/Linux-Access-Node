@@ -1,7 +1,8 @@
-// src/config.js
+const ip = window.location.hostname;
+
 const config = {
-  publicIP: "localhost:5173", // IP do front-end
-  serverIP: "localhost:5000", // IP do back-end
+  publicIP: `${ip}:5173`,
+  serverIP: `${ip}:5000`,
 };
 
 export default config;
