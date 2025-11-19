@@ -1,3 +1,4 @@
+NVM_DIR := $(HOME)/.nvm
 install:
 	# Atualiza e instala ferramentas essenciais
 	sudo apt-get update && sudo apt-get install -y curl git build-essential docker.io
@@ -25,19 +26,21 @@ node:
 	# Instala o NVM (Node Version Manager)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
-	# Carrega o NVM na sessão atual e instala o Node LTS
-	export NVM_DIR="$$HOME/.nvm" && \
-		. "$$NVM_DIR/nvm.sh" && \
-		nvm install --lts && \
-		nvm alias default lts/* && \
-		nvm use default && \
-		echo "Node version: $$(node -v), NPM version: $$(npm -v)"
+	# Carrega o nvm E instala o Node, tudo em um único shell
+	bash -lc '\
+		export NVM_DIR="$$HOME/.nvm"; \
+		. "$$NVM_DIR/nvm.sh"; \
+		nvm install --lts; \
+		nvm alias default lts/*; \
+		nvm use default; \
+		echo "Node version: $$(node -v), NPM version: $$(npm -v)"; \
+	'
 
 
 npm:
 	# Reinstala pastas do npm para evitar conflito entre linux e windows
-	rm -rf node_modules package-lock.json
-	npm install
+	-rm -rf node_modules package-lock.json
+	. $(NVM_DIR)/nvm.sh && nvm use 24 && npm install
 
 run:
 	npm run dev -- --host &
