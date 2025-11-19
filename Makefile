@@ -40,7 +40,7 @@ node:
 npm:
 	# Reinstala pastas do npm para evitar conflito entre linux e windows
 	-rm -rf node_modules package-lock.json
-	. $(NVM_DIR)/nvm.sh && nvm use 24 && npm install
+	npm install
 
 run:
 	npm run dev -- --host &
