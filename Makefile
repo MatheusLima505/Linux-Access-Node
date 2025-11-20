@@ -35,12 +35,14 @@ node:
 		nvm use default; \
 		echo "Node version: $$(node -v), NPM version: $$(npm -v)"; \
 	'
-
-
 npm:
 	# Reinstala pastas do npm para evitar conflito entre linux e windows
 	-rm -rf node_modules package-lock.json
-	npm install
+	bash -lc '\
+		export NVM_DIR="$$HOME/.nvm"; \
+		. "$$NVM_DIR/nvm.sh"; \
+		npm install; \
+	'
 
 run:
 	npm run dev -- --host &
