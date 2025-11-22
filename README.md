@@ -32,7 +32,6 @@ nvm install --lts
 # Make
 sudo apt install make
 ```
-### Importante
 É importante garantir que o seu usuário esteja nos grupos sudo e docker para evitar erros. 
 
 ```
