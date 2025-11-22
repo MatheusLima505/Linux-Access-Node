@@ -44,7 +44,6 @@ sudo usermod -aG docker $USER
 
 # Aplicar as mudanças
 newgrp docker
-
 ```
 ## 2. Configure o projeto
 
