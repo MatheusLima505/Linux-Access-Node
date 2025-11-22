@@ -32,8 +32,23 @@ nvm install --lts
 # Make
 sudo apt install make
 ```
+### Importante
+É importante garantir que o seu usuário esteja nos grupos sudo e docker para evitar erros. 
 
+```
+# Adicionar ao grupo sudo
+sudo usermod -aG sudo $USER
+
+# Adicionar ao grupo docker
+sudo usermod -aG docker $USER
+
+# Aplicar as mudanças
+newgrp docker
+
+```
 ## 2. Configure o projeto
+
+
 
 No diretório principal do projeto, rode:
 ```
