@@ -131,7 +131,7 @@ app.post('/api/createcontainer', async (req, res) => {
 
   try {
     // Cria o container usando o Docker
-    exec(`docker run -d --restart=always --name ${containerName} -p ${aport}:7681 ttyd-test bash -c "while true; do sleep 9999; done"`
+    exec(`docker run -d --restart=always --name ${containerName} -p ${aport}:7681 ttyd-test bash -c "ttyd -W bash & while true; do sleep 9999; done"`
       , async (error, stdout, stderr) => {
       if (error) {
         console.error("Erro ao criar container:", error);
